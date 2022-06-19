@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-home',
@@ -7,9 +8,19 @@ import { Component, OnInit } from '@angular/core';
 })
 export class HomeComponent implements OnInit {
 
-  constructor() { }
+  searchFlightForm!: FormGroup
 
-  ngOnInit(): void {
+  constructor(private formBuilder: FormBuilder) { }
+
+  ngOnInit() {
+    this.searchFlightInit();
+  }
+
+  searchFlightInit() {
+    this.searchFlightForm = this.formBuilder.group({
+      from: [''],
+      to: [''],
+    })
   }
 
 }

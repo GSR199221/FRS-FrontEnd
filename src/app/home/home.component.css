@@ -94,3 +94,11 @@
     overflow-y: scroll;
     height: 300px
 }
+
+.input-group {
+    display: inline;
+}
+
+.radioBtn {
+    text-align: center;
+}
