@@ -9,7 +9,7 @@
         <ul class="nav nav-tabs nav-fill" id="myTab" role="tablist">
           <li class="nav-item" role="presentation">
             <button class="nav-link active" #one id="faq_tab_1-tab" data-bs-toggle="tab" data-bs-target="#faq_tab_1"
-              type="button" role="tab" aria-controls="faq_tab_1" aria-selected="true">
+              type="button" (click)="clickone()" role="tab" aria-controls="faq_tab_1" aria-selected="true">
               <div class="d-flex flex-column lh-lg">
                 <i class="bx bxs-plane-alt"></i>
                 <span style="font-size: larger">Book Flight</span>
@@ -18,7 +18,7 @@
           </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link " #two id="faq_tab_2-tab" data-bs-toggle="tab" data-bs-target="#faq_tab_2"
-              type="button" role="tab" aria-controls="faq_tab_2" aria-selected="false">
+              type="button" (click)="clicktwo()" role="tab" aria-controls="faq_tab_2" aria-selected="false">
               <div class="d-flex flex-column lh-lg">
                 <i class="bx bxs-shopping-bag"></i>
                 <span style="font-size: larger">Manage Bookings</span>
@@ -47,18 +47,18 @@
         <div class="tab-content" id="myTabContent">
           <!-- tab-1 -->
           <div class="tab-pane fade active show" id="faq_tab_1" role="tabpanel" aria-labelledby="faq_tab_1-tab">
-            <div class="container p-3">
+            <div class="container p-3 scroll-y">
               <div class="input-group mb-3" *ngIf="!isSelectedFlight">
-                <form [formGroup]="form">
+                <form [formGroup]="form" *ngIf="!flightList.length">
                   <div class="radioBtn">
                     <div class="form-check form-check-inline mb-3">
                       <input class="form-check-input" type="radio" name="tripType" id="inlineRadio1"
-                        formControlName="tripType" value="option1" />
+                        formControlName="tripType" value="oneway" />
                       <label class="form-check-label" for="inlineRadio1">One Trip</label>
                     </div>
                     <div class="form-check form-check-inline mb-3">
                       <input class="form-check-input" type="radio" name="tripType" id="inlineRadio2"
-                        formControlName="tripType" value="option2" />
+                        formControlName="tripType" value="round" />
                       <label class="form-check-label" for="inlineRadio2">Round Trip</label>
                     </div>
                   </div>
@@ -92,9 +92,9 @@
                         <input formControlName="date" type="date" class="form-control dateSize" />
                       </div>
                     </div>
-                    <div class="col-4">
+                    <div class="col-4" *ngIf="form.value.tripType!=='oneway'">
                       <div class="input-group">
-                        <label class="form-label" for="date">Return Date</label>
+                        <label class="form-label" for="date">Return Date {{form.value.tripType}}</label>
                         <input formControlName="returnDate" type="date" class="form-control dateSize" />
                       </div>
                     </div>
@@ -108,7 +108,7 @@
                   </div>
                 </form>
 
-                <div class="row mb-2">
+                <!-- <div class="row mb-2">
                   <div class="col-8 offset-2">
                     <ol class="list-group-item" [class.active]="isActive==i" *ngFor="let row of flightList;let i=index">
                       <div class="row">
@@ -124,8 +124,31 @@
                       </div>
                     </ol>
                   </div>
+                </div> -->
+
+                <div *ngIf="flightList.length" class="container p-3 scroll-y" style="margin-top: 35px;">
+                  <div class="p-3 d-flex justify-content-between align-items-center">
+                    <div class="row">
+                      <!-- <div class="col-8 offset-2"> -->
+                      <ol class="list-group-item" [class.active]="isActive==i"
+                        *ngFor="let row of flightList;let i=index">
+                        <div class="row">
+                          <div class="col-2">{{row.flightName}}</div>
+                          <div class="col-2">{{row.flightCode}}</div>
+                          <div class="col-2">{{row.bookedDate}}</div>
+                          <div class="col-2">{{row.from}}</div>
+                          <div class="col-2">{{row.to}}</div>
+                          <div class="col-2">
+                            <button type="submit" (click)="onSelectFlight(i,row)" class="btn btn-primary">Book</button>
+                          </div>
+                        </div>
+                      </ol>
+                    </div>
+
+                  </div>
                 </div>
               </div>
+
               <div *ngIf="isSelectedFlight" class="input-group mb-3">
 
                 <div class="row">
@@ -141,67 +164,52 @@
                     <div formArrayName="adults">
                       <div *ngFor="let employee of employees().controls; let i=index">
                         <div [formGroupName]="i">
-                          <div class="col-3">
-                            <label for="person" class="form-label">person</label>
-                            <input type="text" formControlName="personName" class="form-control">
-                          </div>
-                          <div class="col-2">
-                            <label for="gender" class="form-label">Gender</label>
-                            <select class="form-select" formControlName="gender" aria-label="Default select example">
-                              <option selected>Open this select Gender</option>
-                              <option value="Male">Male</option>
-                              <option value="Female">Female</option>
-                            </select>
-                          </div>
-                          <div class="col-2">
-                            <label for="age" class="form-label">age</label>
-                            <input type="text" formControlName="age" class="form-control">
-                          </div>
+                          <div class="row">
 
-                          <div class="col-2">
-                            <label for="mealType" class="form-label">Meal Type</label>
-                            <!-- <input type="text" formControlName="age" class="form-control"> -->
+                            <div class="col-3">
+                              <label for="person" class="form-label">Passenger Name</label>
+                              <input style="height: 40px;" type="text" formControlName="personName"
+                                class="form-control">
+                            </div>
+                            <div class="col-2">
+                              <label for="gender" class="form-label">Gender</label>
+                              <select class="form-select" formControlName="gender" aria-label="Default select example">
+                                <option selected>Open this select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                              </select>
+                            </div>
 
-                            <select class="form-select" formControlName="menuType" aria-label="Default select example">
-                              <option selected>Open this select menu</option>
-                              <option value="Veg">veg</option>
-                              <option value="Non-Veg">non veg</option>
-                            </select>
+                            <div class="col-2">
+                              <label for="age" class="form-label">Age</label>
+                              <input style="height: 40px;" type="text" formControlName="age" class="form-control">
+                            </div>
+
+                            <div class="col-2">
+                              <label for="mealType" class="form-label">Meal Type</label>
+                              <!-- <input type="text" formControlName="age" class="form-control"> -->
+
+                              <select class="form-select" formControlName="menuType"
+                                aria-label="Default select example">
+                                <option value="Veg">Veg</option>
+                                <option value="Non-Veg">Non-veg</option>
+                              </select>
+                            </div>
+                            <div class="col-3" style="margin-top: 30px;">
+                              <button class="btn btn-success custom-button" style="height: 40px;"
+                                (click)="addEmployee()">Add
+                                Passenger</button>
+                            </div>
                           </div>
-
-
                         </div>
                       </div>
 
-                      <div class="col-2">
-                        <button (click)="addEmployee()">Add Adult</button>
-                      </div>
-                      <div class="col-2">
-                        <button (click)="countinueBooking()">Book Now</button>
+                      <div class="d-flex justify-content-center" style="margin-top: 50px;">
+                        <button class="btn btn-success custom-button px-4" (click)="countinueBooking()">
+                          Book Now
+                        </button>
                       </div>
                     </div>
-
-
-
-
-                    <!-- <div class="col-8 offset-2 mb-3">
-                            <h4>
-                                Traveler Info
-                            </h4>
-                            <label for="exampleInputPassword1" class="form-label">Adult 1</label>
-                            <input formControlName="travellerCount" type="text" class="form-control"
-                                id="exampleInputPassword1">
-                        </div>
-    
-                        <div class="col-4 offset-2 mb-3">
-                            <p>
-                                Total Price: <strong>{{selectedFlight?.price}}</strong>
-                            </p>
-                        </div>
-                        <div class="col-4  mb-3 d-grid gap-2">
-                            <button type="submit" (click)="countinueBooking()" class="btn btn-block btn-primary">Countinue
-                                to Booking</button>
-                        </div> -->
                   </form>
                 </div>
 
@@ -214,12 +222,13 @@
           <div class="tab-pane fade" id="faq_tab_2" role="tabpanel" aria-labelledby="faq_tab_2-tab">
             <div class="container p-3 scroll-y">
 
-              <div class="border-top p-3 d-flex justify-content-between align-items-center"
+              <!-- <div class="border-top p-3 d-flex justify-content-between align-items-center"
                 *ngFor="let flight of bookedFlghtsList">
                 <div class="d-flex flex-column">
 
                   <span> {{flight.flightName}} </span>
                   <span>{{flight.price}}</span>
+                  <span>tripType: {{flight.tripType}}</span>
                   <div class="d-flex justify-content-between align-items-center">
                     <span>{{flight.from}}</span>
                     <i class="bx bxs-plane-take-off ms-3 me-3 text-warning"></i>
@@ -246,40 +255,78 @@
                     </span>
                   </div>
                 </div>
-              </div>
+              </div> -->
 
+              <!-- <div class="container p-3 scroll-y" style="margin-top: 35px;"> -->
+              <div class="p-3 d-flex justify-content-between align-items-center">
+                <div class="row">
+                  <!-- <div class="col-8 offset-2"> -->
+                  <ol class="list-group-item" *ngFor="let flight of bookedFlghtsList">
+                    <div class="row">
+                      <!-- <div class="col-2">{{flight.logo}}</div> -->
+                      <div class="col-2">{{flight.flightName}}</div>
+                      <div class="col-2">{{flight.flightCode}}</div>
+                      <div class="col-2">{{flight.from}}</div>
+                      <div class="col-2">{{flight.to}}</div>
+                      <div class="col-2">{{flight.bookedDate}}</div>
+                      <div class="col-2">
+                        <div class="col-2">
+                          <span>
+                            <button type="button" style="margin: 5px;width: 85px;" (click)="bookingHstory(flight)"
+                              class="btn btn-outline-secondary btn-sm">View</button>
+                          </span>
+                        </div>
+                        <div class="col-2">
+                          <span>
+                            <button type="button" style="margin: 5px;width: 85px;" (click)="bookingHstory(flight)"
+                              class="btn btn-outline-secondary btn-sm">Download</button>
+                          </span>
+                        </div>
+                        <div class="col-2">
+                          <span *ngIf="flight.pending">
+                            <button type="button" style="margin: 5px;width: 85px;" class="btn btn-outline-danger btn-sm"
+                              (click)="cancelFlight(flight)">Cancel</button>
+                          </span>
+                        </div>
+
+                      </div>
+                    </div>
+                  </ol>
+                  <!-- </div> -->
+
+                </div>
+              </div>
             </div>
           </div>
 
           <!-- tab-3 -->
           <div class="tab-pane fade" id="faq_tab_3" role="tabpanel" aria-labelledby="faq_tab_3-tab">
             <div class="container p-3 mt-4">
-              {{flightBookHistory|json}}
-              <div class="input-group mb-3">
-                <input type="text" class="form-control" placeholder="Search hotels..." />
-                <input type="text" class="form-control" placeholder="Location" />
+              <div class="p-3 d-flex justify-content-between align-items-center">
+                <div class="row">
+                  <!-- <div class="col-8 offset-2"> -->
+                  <div *ngFor="let row of flightList;let i=index">
+                    <ol class="list-group-item" *ngIf="!row.block">
+                      <div class="row">
+                        <div class="col-2">{{row.flightName}}</div>
+                        <div class="col-2">{{row.flightCode}}</div>
+                        <div class="col-2">{{row.bookedDate}}</div>
+                        <div class="col-2">{{row.from}}</div>
+                        <div class="col-2">{{row.to}}</div>
+                        <div class="col-2">
+                          <button type="submit" (click)="blockFlight(i,row)" class="btn btn-primary">Block</button>
+                        </div>
+                      </div>
+                    </ol>
+                  </div>
+
+                </div>
+
               </div>
-              <div class="input-group mb-3">
-                <select class="form-select form-control" id="inputGroupSelect02">
-                  <option selected>Rooms</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3+</option>
-                </select>
-                <select class="form-select form-control" id="inputGroupSelect02">
-                  <option selected>Members</option>
-                  <option value="1">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
-                  <option value="3">Four</option>
-                  <option value="3">Five</option>
-                </select>
-              </div>
-              <div class="mt-4 d-flex justify-content-end">
-                <button class="btn btn-success custom-button px-5">
-                  Search Hotels
-                </button>
-              </div>
+
+
+              <!-- {{flightBookHistory|json}} -->
+              <!-- {{flightBookHistory.flightName}} -->
             </div>
           </div>
 

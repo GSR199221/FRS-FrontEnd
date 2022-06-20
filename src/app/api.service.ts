@@ -65,7 +65,7 @@ export class ApiService {
         return res;
       }))
   }
-  
+
   getBookings() {
     return this.http.get<any>("http://localhost:3000/bookedFlights")
       .pipe(map((res: any) => {
@@ -73,10 +73,17 @@ export class ApiService {
       }))
   }
 
-  deleteBookings(id:any){
+  deleteBookings(id: any) {
     return this.http.delete<any>(`http://localhost:3000/bookedFlights/${id}`)
-    .pipe(map((res: any) => {
-      return res;
-    }))
+      .pipe(map((res: any) => {
+        return res;
+      }))
+  }
+
+  getBookingsId(id: any) {
+    return this.http.get<any>(`http://localhost:3000/bookedFlights/${id}`)
+      .pipe(map((res: any) => {
+        return res;
+      }))
   }
 }

@@ -38,15 +38,20 @@ import { ApiService } from '../api.service';
   styleUrls: ['./home.component.css']
 })
 // UserBookingComponent
-export class  HomeComponent implements OnInit {
+export class HomeComponent implements OnInit {
   fromList = [
-    'Hyderabad', 'Benguluru', 'Chennai', 'Vizag'
+    'Hyderabad',
+    'Bangalore',
+    'Mumbai',
+    'Visakhapatnam',
+    'Chennai'
   ]
   toList = [
-    'Benguluru',
-    'Hyderabad',
-    'Vizag',
-    'Chennai'
+    'Chennai',
+    'Visakhapatnam',
+    'Mumbai',
+    'Bangalore',
+    'Hyderabad'
   ]
   searchFlightForm!: FormGroup
   isActive: any
@@ -58,12 +63,12 @@ export class  HomeComponent implements OnInit {
   @ViewChild('one') one!: ElementRef<HTMLElement>;
   @ViewChild('two') two!: ElementRef<HTMLElement>;
   @ViewChild('three') three!: ElementRef<HTMLElement>;
-  flightBookHistory: any;
+  flightBookHistory: any
   isSelectedFlight = false;
 
 
-  constructor(private fb: FormBuilder,private _api: ApiService, private _router: Router,
-    private render:Renderer2) { }
+  constructor(private fb: FormBuilder, private _api: ApiService, private _router: Router,
+    private render: Renderer2) { }
 
   ngOnInit(): void {
     this.inItForm();
@@ -71,17 +76,22 @@ export class  HomeComponent implements OnInit {
   }
 
   clickone() {
+    this.isSelectedFlight = false
     let el: HTMLElement = this.one.nativeElement;
     el.click();
+    this.search()
+
   }
   clicktwo() {
     let el: HTMLElement = this.two.nativeElement;
     el.click();
     setTimeout(() => {
-      this._api.getBookings().subscribe((res:any) => {
+      this._api.getBookings().subscribe((res: any) => {
         this.bookedFlghtsList = res
       })
     }, 1000);
+    // this.form.reset()
+    this.form.patchValue({ tripType: 'oneway', from: 'From', to: 'To' })
   }
   clickthree() {
     let el: HTMLElement = this.three.nativeElement;
@@ -89,11 +99,11 @@ export class  HomeComponent implements OnInit {
   }
   inItForm() {
     this.form = this.fb.group({
-      from: [''],
-      to: [''],
+      from: ['From'],
+      to: ['To'],
       date: [''],
       returnDate: [''],
-      tripType:['']
+      tripType: ['oneway']
 
     })
   }
@@ -119,15 +129,17 @@ export class  HomeComponent implements OnInit {
   }
 
   search() {
-    this._api.getFlights().subscribe((res:any) => {
-      this.flightList = res.filter((ele:any) => {
+    this._api.getFlights().subscribe((res: any) => {
+      this.flightList = res.filter((ele: any) => {
         ele.bookedDate = this.form.value.date
+        ele.tripType = this.form.value.tripType
+        ele.returnDate = this.form.value.tripType == 'oneway' ? null : this.form.value.returnDate
         return ele.from == this.form.value.from && ele.to == this.form.value.to
       })
     })
   }
 
-  onSelectFlight(i:any, row:any) {
+  onSelectFlight(i: any, row: any) {
     this.isActive = i
     this.selectedFlight = row
     this.isSelectedFlight = true
@@ -141,26 +153,40 @@ export class  HomeComponent implements OnInit {
       ... this.userform.value,
       pending: true
     }
-    this._api.postBookFlight(paylod).subscribe((res:any) => {
+    delete paylod.id
+    this._api.postBookFlight(paylod).subscribe((res: any) => {
       alert('Seccuss booking')
     })
     // this.two.nativeElement.addClass='active'
     // this.render.addClass(this.two,"active");
 
 
-    this.clicktwo() 
+    this.clicktwo()
   }
 
-  bookingHstory(row:any) {
+  bookingHstory(row: any) {
     this.clickthree()
-    this.flightBookHistory = row
+    // this.flightBookHistory = row
+    this._api.getBookingsId(row.id).subscribe((res: any) => {
+      console.log(res, 'jhghjghg');
+      this.flightBookHistory = res;
+    })
   }
 
-  cancelFlight(row:any) {
-    this._api.deleteBookings(row.id).subscribe((res:any) => {
-      this._api.getBookings().subscribe((res:any) => {
+  cancelFlight(row: any) {
+    this._api.deleteBookings(row.id).subscribe((res: any) => {
+      this._api.getBookings().subscribe((res: any) => {
         this.bookedFlghtsList = res
       })
     })
+  }
+
+  blockFlight(i: any, row: any) {
+    this.flightList[i].block = true
+    // this._api.blockFlight(row.id).subscribe((res: any) => {
+    //   this._api.getBookings().subscribe((res: any) => {
+    //     this.bookedFlghtsList = res
+    //   })
+    // })
   }
 }
